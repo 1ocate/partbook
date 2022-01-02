@@ -18,6 +18,7 @@
 		.ui-combobox {
 			position: relative;
 			display: inline-block;
+			
 		}
 		.ui-combobox-toggle {
 			position: absolute;
@@ -37,10 +38,16 @@
 
 	<script>
 		$(document).ready(function() {
+
+			// button function "add"
 			$('#plus5').click(function() {
+
+				// reading value from form
 				var code = $('#code').val();
 				var machin = $('#machin').val();
 				var qty = $('#qty').val();
+
+				// require form value				
 				if(code==''){
 					alert("Please input code");
 					$( "#code" ).focus();
@@ -51,30 +58,36 @@
 					return false;
 				}
 
+				// qty default 1
 				if((qty=='')){
 					qty = 1;
 					
 				}
 
+				// add to part list when click add button
 				$('#dynamic_form ').append('<div class="row"><div class="col">'+code+' '+machin+' '+qty+'</div><div class="col-2"> <a href="javascript:void(0)" class="btn btn-danger removeRow" id="minus5">Remove</a></div></div>');
+
+				// when click add input type "text" value reset	
 				var input = $('input[type=text],textarea');
 				input.val("");
+				
+				// when click add reset quality select 
+				$("#quality").val("");
+
 			});
 			
-			//$('.removeRow').live("click", function() {
+			// when click button "remove" will remove row
 			$(document).on('click', '#minus5', function() {
   				$(this).closest('.row').remove();
 			});
 	
-			
+			// reading code number	
 			$( "#code" ).autocomplete({
 				minLength: 4,
 				source: 'data.php'			
 			});
 			
-			
-			
-
+			// for machine input and select combobox
 			(function ($) {
 			$.widget("ui.combobox", {
 				_create: function() {
@@ -119,22 +132,20 @@
 			});
 			})(jQuery);
 
+			// for machine input and select combobox
+			$("#machin").combobox({
+				source: function( request, response ) {
+				let partname = $('#code').val();
+				const partno = partname.split(" ");
 
-			$(function() {
-				$("#machin").combobox({
-					source: function( request, response ) {
-					let partname = $('#code').val();
-					const partno = partname.split(" ");
-
-						$.getJSON( "machine.php", {
-							term : request.term,
-							partno : partno[0]
-						}, response );
-									
-					},
-					selectFirst:true,
-					autoFocus: true
-				});
+					$.getJSON( "machine.php", {
+						term : request.term,
+						partno : partno[0]
+					}, response );
+								
+				},
+				selectFirst:true,
+				autoFocus: true
 			})
 
 			
@@ -146,19 +157,26 @@
         <form method="POST">
 	        <div class="form-group mt-5" id="dynamic_form">
                 <div class="row mb-5">
-	                <div class="col-md-5">
+	                <div class="col-lg-4">
 	                    <input type="text" name="code" id="code" placeholder="Enter Code" class="form-control" required>
 	                </div>
-	                <div class="col-md-4">
-	                    <!--<input type="text" class="form-control" name="brand" id="brand" placeholder="Enter Product Quantity" onkeyup = "if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')";>-->
+	                <div class="col-lg-3">
 	                    <input type="text" class="" name="machin" id="machin" placeholder="Enter machin" required>
 	                </div>
-	                <div class="col-md-1">
+					<div class="col-lg-2">
+	                    <select class="form-control" name="quality" id="quality" required>
+							<option disabled="disabled" selected="selected" value="">select quality</option>
+							<option>Original</option>
+							<option>kawe</option>
+							<option>Both</option>
+						</select>
+	                </div>
+	                <div class="col-lg-2">
 	                    <input type="text" class="form-control"  name="Qty" placeholder="Qty" id="qty" ></textarea>
 	                </div>
-	                <div class="col-md">
-	                    <a href="javascript:void(0)" class="btn btn-primary" id="plus5">Add</a>
-	                </div>
+					<div class="col-lg-1">
+	                    <a href="javascript:void(0)" class="w-100 btn btn-primary" id="plus5">Add</a>
+	                </div> 
 	            </div>
 				<div class="row">
 	                <div class="col">
@@ -170,33 +188,6 @@
 			<button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
-    <!--<script>
-        $(document).ready(function() {
-        	var dynamic_form =  $("#dynamic_form").dynamicForm("#dynamic_form","#plus5", "#minus5", {
-		        limit:10,
-		        formPrefix : "dynamic_form",
-		        normalizeFullForm : false
-		    });
-
-        	//dynamic_form.inject([{p_name: 'Hemant',quantity: '123',remarks: 'testing remark'},{p_name: 'Harshal',quantity: '123',remarks: 'testing remark'}]);
-
-		    $("#dynamic_form #minus5").on('click', function(){
-		    	var initDynamicId = $(this).closest('#dynamic_form').parent().find("[id^='dynamic_form']").length;
-		    	if (initDynamicId === 2) {
-		    		$(this).closest('#dynamic_form').next().find('#minus5').hide();
-		    	}
-		    	$(this).closest('#dynamic_form').remove();
-		    });
-
-		    $('form').on('submit', function(event){
-	        	var values = {};
-				$.each($('form').serializeArray(), function(i, field) {
-				    values[field.name] = field.value;
-				});
-				console.log(values)
-        		event.preventDefault();
-        	})
-        });
-    </script>-->
+    
 </body>
 </html>
