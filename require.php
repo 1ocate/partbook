@@ -1,3 +1,14 @@
+<?php 
+	session_start();
+	require_once 'config.php';
+	require_once 'dbh.php';
+	require_once 'functions.php';
+
+	if (empty($_SESSION)){
+		//header("location:login.php");
+	}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,13 +18,52 @@
     <title>Panel Collapse Demo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/dynamic-form.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
 	
 </head>
 <body>
+<?php
+
+// check submit line value
+if (!empty($_POST['code']) || $_POST['machine'] || $_POST['quality'] || $_POST['qty'])	{ 
+	$code = $_POST['code'];
+	$machine = $_POST['machine'];
+	$quality = $_POST['quality'];
+	$qty = $_POST['qty'];
+}
+
+// user information
+if (!empty($code) )	{
+	$sql = "INSERT INTO require_part (fk_user)
+	VALUES ('12')";
+
+	// find last insert require_part id
+	if ($conn->query($sql) === TRUE) {
+		$require_id = $conn->insert_id;
+	}
+
+	foreach( $code as $key => $n ) {
+		$sql = "INSERT INTO require_part_line (fk_require,partname,machine,quality,qty)
+		VALUES ('$require_id','$code[$key]','$machine[$key]','$quality[$key]','$qty[$key]')";
+		$conn->query($sql);
+	}	
+
+	unset($code);
+	unset($machine);
+	unset($qty);
+	unset($require_id);
+	unset($_POST['code']);
+	unset($_POST['machine']);
+	unset($_POST['qty']);
+	header('Location: '.$_SERVER['PHP_SELF']);
+}
+
+
+
+?>
+
 	<style>
 		.ui-combobox {
 			position: relative;
@@ -41,27 +91,28 @@
 		$(document).ready(function() {
 			
 			// if no input submit disable
-			$("#btnSubmit").attr("disabled", true);
+			//$("#btnSubmit").attr("disabled", true);
 
 			// button function "add"
 			$('#plus5').click(function() {
 
 				// reading value from form
 				var code = $('#code').val();
-				var machin = $('#machin').val();
+				var machine = $('#machine').val();
 				var qty = $('#qty').val();
+				var quality = $('#quality').val();
 
 				// require form value				
 				if(code==''){
 					alert("Please input code");
 					$( "#code" ).focus();
 					return false;
-				}else if((machin=='')){
-					alert("Please input machin.");
-					$( "#machin" ).focus();
+				
+				} else if((quality==null)){
+					alert("Please input "+quality+".");
+					$( "#quality" ).focus();
 					return false;
 				}
-
 				// qty default 1
 				if((qty=='')){
 					qty = 1;
@@ -69,20 +120,29 @@
 				}
 
 				// add to part list when click add button
-				$('#dynamic_form ').append('<div class="row"><div class="col-9 mr-auto">'+code+' '+machin+' '+qty+'</div><div class="col-2"><a href="javascript:void(0)" class="btn btn-danger removeRow" id="minus5">X</a></div></div>');
+				$('#dynamic_form ').append(
+					'<div class="row">'
+					+ '<div class="col-9 mr-auto">'+code+' '+machine+' '+qty+'</div><div class="col-2"><a href="javascript:void(0)" class="btn btn-danger removeRow" id="minus5">X</a></div>'
+					+ '<input type="hidden" name="code[]" value="'+code+'" />'
+					+ '<input type="hidden" name="machine[]" value="'+machine+'" />'
+					+ '<input type="hidden" name="quality[]" value="'+quality+'" />'
+					+ '<input type="hidden" name="qty[]" value="'+qty+'" />'
+					+ '</div>'
+				);
 
 				// when click add input type "text" value reset	
 				var input = $('input[type=text],textarea');
 				input.val("");
 				
 				// when click add reset quality select 
-				$("#quality").val("");
+				quality = '';
 
 			});
 			
 			// when click button "remove" will remove row
 			$(document).on('click', '#minus5', function() {
   				$(this).closest('.row').remove();
+
 			});
 	
 			// reading code number	
@@ -144,7 +204,7 @@
 			})(jQuery);
 
 			// for machine input and select combobox
-			$("#machin").combobox({
+			$("#machine").combobox({
 				source: function( request, response ) {
 				let partname = $('#code').val();
 				const partno = partname.split(" ");
@@ -169,17 +229,17 @@
 	        <div class="form-group mt-5" id="dynamic_form">
                 <div class="row mb-5">
 	                <div class="col-lg-4">
-	                    <input type="text" name="code" id="code" placeholder="Enter Code" class="form-control" required>
+	                    <input type="text" name="code" id="code" placeholder="Enter Code" class="form-control" >
 	                </div>
 	                <div class="col-lg-3">
-	                    <input type="text" class="" name="machin" id="machin" placeholder="Enter machin" required>
+	                    <input type="text" class="" name="machine" id="machine" placeholder="Enter machine" >
 	                </div>
 					<div class="col-lg-2">
-	                    <select class="form-control" name="quality" id="quality" required>
+	                    <select class="form-control" name="quality" id="quality" >
 							<option disabled="disabled" selected="selected" value="">Select quality</option>
-							<option>Original</option>
-							<option>kawe</option>
-							<option>Both</option>
+							<option value="0">Original</option>
+							<option value="1">kawe</option>
+							<option value="2">Both</option>
 						</select>
 	                </div>
 	                <div class="col-lg-2">
