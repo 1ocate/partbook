@@ -50,7 +50,7 @@ $mail->send();
 */
 
 $_SESSION['id']=$id;
-//header('location:index.php');
+header('location:index.php');
 }
 else{
     $error='User already exists';

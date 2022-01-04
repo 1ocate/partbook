@@ -8,7 +8,11 @@ if (empty($_SESSION)){
 	header("location:login.php");
 }
 
-
+if (isset($_SESSION['currenct_id'])){
+	$_SESSION['currenct_require'] = $_SESSION['currenct_id'];
+	//header('Location:test.php');
+	unset($_SESSION['currenct_id']);
+}
 
 // check submit line value
 if (!empty($_POST['code']) || $_POST['machine'] || $_POST['quality'] || $_POST['qty'])	{ 
@@ -46,8 +50,7 @@ if (!empty($code) )	{
 	unset($_POST['code']);
 	unset($_POST['machine']);
 	unset($_POST['qty']);
-	//header('Location: '.$_SERVER['PHP_SELF']); 
-	header('Location:done.php');
+	header('Location: '.$_SERVER['PHP_SELF']); 
 }
 
 
