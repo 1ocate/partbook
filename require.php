@@ -7,6 +7,11 @@
 	if (empty($_SESSION)){
 		//header("location:login.php");
 	}
+	if (isset($_SESSION['currenct_id'])){
+		$_SESSION['currenct_require'] = $_SESSION['currenct_id'];
+		header('Location:test.php');
+		unset($_SESSION['currenct_id']);
+	}
 
 ?>
 <!DOCTYPE html>
@@ -34,6 +39,7 @@ if (!empty($_POST['code']) || $_POST['machine'] || $_POST['quality'] || $_POST['
 	$qty = $_POST['qty'];
 }
 
+
 // user information
 if (!empty($code) )	{
 	$sql = "INSERT INTO require_part (fk_user)
@@ -42,6 +48,8 @@ if (!empty($code) )	{
 	// find last insert require_part id
 	if ($conn->query($sql) === TRUE) {
 		$require_id = $conn->insert_id;
+		$_SESSION['currenct_id'] = $require_id;
+
 	}
 
 	foreach( $code as $key => $n ) {
@@ -50,6 +58,8 @@ if (!empty($code) )	{
 		$conn->query($sql);
 	}	
 
+
+	
 	unset($code);
 	unset($machine);
 	unset($qty);
@@ -57,7 +67,7 @@ if (!empty($code) )	{
 	unset($_POST['code']);
 	unset($_POST['machine']);
 	unset($_POST['qty']);
-	header('Location: '.$_SERVER['PHP_SELF']);
+	header('Location: '.$_SERVER['PHP_SELF']); 
 }
 
 
